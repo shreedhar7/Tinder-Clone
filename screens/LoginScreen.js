@@ -1,8 +1,11 @@
-import { View, Text, ImageBackground, TouchableOpacity } from 'react-native'
-import React, { useLayoutEffect, useState } from 'react'
-import tw from 'tailwind-react-native-classnames'
-import { useNavigation } from '@react-navigation/native';
-import { TextInput } from 'react-native-gesture-handler';
+import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
+import React, { useEffect, useLayoutEffect, useState } from "react";
+import tw from "tailwind-react-native-classnames";
+import {createUserWithEmailAndPassword ,  signInWithEmailAndPassword,  updateProfile}from "firebase/auth";
+import { auth } from "../firebase";
+import useAuth from "../hooks/useAuth";
+import { useNavigation } from "@react-navigation/native";
+import { ImageBackground } from "react-native";
 
 const LoginScreen = () => {
     const [type, setType] = useState(1); //1.signin 2.signup
@@ -13,12 +16,46 @@ const LoginScreen = () => {
   
   
     const navigation = useNavigation();
+
+    useEffect (() => {
+      setName("");
+      setEmail("");
+      setPassword("");
+    },[type])
   
     useLayoutEffect(() => {
       navigation.setOptions({
         headerShown: false,
       });
     }, []);
+   
+    const signIn = () => {
+      if(email.trim() ===  "" || password.trim() === "" ){
+        return Alert.alert("ohoo!" , "Please enter all the fields");
+      }signInWithEmailAndPassword(auth ,  email , password)
+      .then(({user})=>{
+        console.log(user);
+      }).catch((err)=>{
+         console.log(err);
+      })
+    };
+  
+    const signUp = () => {
+      if(name.trim() === "" || email.trim() ===  "" || password.trim() === "" ){
+        return Alert.alert("ohoo!" , "Please enter all the fields");
+      }
+      createUserWithEmailAndPassword(auth , email  , password)
+         .then(({user})=>{
+           updateProfile(user ,{displayName:name});
+           console.log(user);
+      })
+      .catch((err)=> {
+        console.log(err);
+        });
+    
+    };
+  
+    
   return (
       <ImageBackground
           style={tw.style("flex-1")}
@@ -56,7 +93,7 @@ const LoginScreen = () => {
             />
             <TouchableOpacity
               style={tw.style("w-full rounded-lg mt-8 bg-black py-3")}
-              onPress={()=>{}}
+              onPress={signIn}
             >
               <Text style={tw.style("text-center text-white font-bold")}>
                 Sign In
@@ -68,6 +105,7 @@ const LoginScreen = () => {
               </Text>
             </TouchableOpacity>
           </View>
+          <Text style={tw.style("absolute bottom-5 text-white font-thin text-center")}>Developed By Shreedhar Thiruvengadan</Text>
         </View>
       ) : (
         <View style={tw.style("flex-1 justify-center items-center")}>
@@ -106,7 +144,7 @@ const LoginScreen = () => {
             />
             <TouchableOpacity
               style={tw.style("w-full rounded-lg mt-8 bg-black py-3")}
-              onPress={()=>{}}
+              onPress={signUp}
             >
               <Text style={tw.style("text-center text-white font-bold")}>
                 Sign Up
@@ -118,6 +156,8 @@ const LoginScreen = () => {
               </Text>
             </TouchableOpacity>
           </View>
+
+          <Text style={tw.style("absolute bottom-5 text-white font-thin text-center")}>Developed By Shreedhar Thiruvengadan</Text>
         </View>
       )}
 

@@ -13,6 +13,8 @@ const LoginScreen = () => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+
+    const {loading , setLoading} = useAuth();
   
   
     const navigation = useNavigation();
@@ -32,11 +34,13 @@ const LoginScreen = () => {
     const signIn = () => {
       if(email.trim() ===  "" || password.trim() === "" ){
         return Alert.alert("ohoo!" , "Please enter all the fields");
-      }signInWithEmailAndPassword(auth ,  email , password)
+      }
+      setLoading(true);
+      signInWithEmailAndPassword(auth ,  email , password)
       .then(({user})=>{
-        console.log(user);
+        setLoading(false);
       }).catch((err)=>{
-         console.log(err);
+        setLoading(false);
       })
     };
   
@@ -44,16 +48,27 @@ const LoginScreen = () => {
       if(name.trim() === "" || email.trim() ===  "" || password.trim() === "" ){
         return Alert.alert("ohoo!" , "Please enter all the fields");
       }
+      setLoading(true)
       createUserWithEmailAndPassword(auth , email  , password)
          .then(({user})=>{
            updateProfile(user ,{displayName:name});
-           console.log(user);
+          setLoading(fasle);
       })
       .catch((err)=> {
-        console.log(err);
+        setLoading(fasle);
         });
     
     };
+
+    if (loading) {
+        return (
+          <View style={tw.style("flex-1 justify-center items-center")}>
+            <Text style={tw.style("font-semibold text-red-400 text-2xl")}>
+              Loading....
+            </Text>
+          </View>
+        );
+      }
   
     
   return (

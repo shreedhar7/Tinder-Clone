@@ -3,6 +3,8 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth, EmailAuthProvider } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getReactNativePersistence, initializeAuth } from "firebase/auth/react-native";
+import { getFirestore, serverTimestamp } from "firebase/firestore";
+
 
 // Your Firebase config
 const firebaseConfig = {
@@ -32,5 +34,7 @@ if (!getApps().length) {
 }
 
 const provider = new EmailAuthProvider();
+const db = getFirestore();
+const timestamp = serverTimestamp();
 
-export { app, auth , provider};
+export { app, auth , provider , db , timestamp};

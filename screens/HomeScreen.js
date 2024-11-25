@@ -1,11 +1,13 @@
 import { View, Text, TouchableOpacity, Image, Alert } from "react-native";
-import React, { useRef } from "react";
+import React, { useLayoutEffect, useRef } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import tw from "tailwind-react-native-classnames";
 import useAuth from "../hooks/useAuth";
 import { Ionicons , Entypo } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import Swiper from "react-native-deck-swiper";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase";
 
 const DUMMY_DATA = [
   {
@@ -52,6 +54,14 @@ const HomeScreen = () => {
   };
 
   const swipeRef = useRef();
+
+  useLayoutEffect (() => {
+    getDoc(doc(db , "users", user.uid)).then((data) =>{
+      if(!data.exists()){
+        navigation.navigate("Modal");
+      }
+    })
+  },[]);
 
   return (
     <SafeAreaView style={tw.style("flex-1 mt-6")}>

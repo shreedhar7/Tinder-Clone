@@ -89,6 +89,7 @@ import {
   
         <TouchableOpacity
           disabled={incompleteForm}
+          onPress={updateUserProfile}
           style={tw.style(
             "w-64 p-3 rounded-xl absolute bottom-10 bg-red-400",
             incompleteForm && "bg-gray-400"

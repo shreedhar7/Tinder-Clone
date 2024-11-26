@@ -4,6 +4,7 @@ import { getAuth, EmailAuthProvider } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getReactNativePersistence, initializeAuth } from "firebase/auth/react-native";
 
+
 // Your Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDq0fCYo8hCw4qxIqXpgYtiC7FPmJCxVJk",

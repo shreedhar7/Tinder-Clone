@@ -6,10 +6,10 @@ import {
     TouchableOpacity,
     Alert,
   } from "react-native";
-  import React, { useState } from "react";
+  import React, { useEffect, useLayoutEffect, useState } from "react";
   import tw from "tailwind-react-native-classnames";
   import useAuth from "../hooks/useAuth";
-  import { doc, setDoc } from "firebase/firestore";
+  import { doc, getDoc, setDoc } from "firebase/firestore";
   import { db, timestamp } from "../firebase";
   import { useNavigation } from "@react-navigation/native";
   
@@ -38,6 +38,16 @@ import {
           Alert.alert("Error", err.message);
         });
     };
+
+    useLayoutEffect(()=>{
+      getDoc(doc(db, "users" , user.uid)).then((data)=>{
+        if(!data.exists()){
+          navigation.navigate("Modal");
+        }
+      })
+    },[])
+
+   
   
     return (
       <View style={tw.style("flex-1 items-center pt-1")}>

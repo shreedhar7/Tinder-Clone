@@ -1,12 +1,12 @@
 import { View, Text, TouchableOpacity, Image, Alert } from "react-native";
-import React, { useLayoutEffect, useRef } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { SafeAreaView, useSafeAreaFrame } from "react-native-safe-area-context";
 import tw from "tailwind-react-native-classnames";
 import useAuth from "../hooks/useAuth";
 import { Ionicons , Entypo } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import Swiper from "react-native-deck-swiper";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
 
 const DUMMY_DATA = [
@@ -39,6 +39,7 @@ const DUMMY_DATA = [
 const HomeScreen = () => {
   const { user, logout } = useAuth();
   const navigation = useNavigation();
+  const [profile , setProfile] = useState('')
 
   const handleLogout = () => {
     Alert.alert("Confirm Logout", "Are you sure you want to log out?", [
@@ -57,11 +58,30 @@ const HomeScreen = () => {
 
   useLayoutEffect (() => {
     getDoc(doc(db , "users", user.uid)).then((data) =>{
-      if(!data.exists()){
+      if(!data.exists()) {
         navigation.navigate("Modal");
       }
     })
   },[]);
+
+  useEffect(()=>{
+    let unnsubscribe;
+
+    const fetchCards = async  () => {
+      unsubscribe = onSnapshot(collection(db, "users"),  (snapshot) => {
+        setProfile(
+          snapshot.docs.map((doc)=> ({
+            id:doc.id,
+            ...doc.data(),
+          }))
+        )
+      })
+    }
+    fetchCards();
+    return unnsubscribe;
+  },[])
+
+  
 
   return (
     <SafeAreaView style={tw.style("flex-1 mt-6")}>
@@ -94,7 +114,7 @@ const HomeScreen = () => {
     containerStyle={{
       backgroundColor: "transparent",
     }}
-    cards={DUMMY_DATA}
+    cards={profile}
     stackSize={5}
     cardIndex={0}
     animateCardOpacity

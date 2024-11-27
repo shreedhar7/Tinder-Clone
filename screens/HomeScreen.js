@@ -6,8 +6,18 @@ import useAuth from "../hooks/useAuth";
 import { Ionicons , Entypo } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import Swiper from "react-native-deck-swiper";
-import { collection, doc, getDoc, onSnapshot } from "firebase/firestore";
-import { db } from "../firebase";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  query,
+  setDoc,
+  where,
+} from "firebase/firestore";
+import { db, timestamp } from "../firebase";
+import generateId from "../lib/generateId";
 
 const DUMMY_DATA = [
   {
@@ -64,22 +74,107 @@ const HomeScreen = () => {
     })
   },[]);
 
+  
+
   useEffect(()=>{
-    let unnsubscribe;
+    let unsubscribe;
 
     const fetchCards = async  () => {
-      unsubscribe = onSnapshot(collection(db, "users"),  (snapshot) => {
-        setProfile(
-          snapshot.docs.map((doc)=> ({
-            id:doc.id,
-            ...doc.data(),
-          }))
-        )
-      })
-    }
+      
+
+      const passes = await getDocs(
+        collection(db, "users", user.uid, "passes")
+      ).then((snapShot) => snapShot.docs.map((doc) => doc.id));
+
+      console.log(passes);
+     
+
+      const swipes = await getDocs(
+        collection(db, "users", user.uid, "swipes")
+      ).then((snapShot) => snapShot.docs.map((doc) => doc.id));
+       console.log(swipes);
+
+      const passedUserIds = passes.length > 0 ? passes : ["temp"];
+      const swipedUserIds = swipes.length > 0 ? swipes : ["temp"];
+
+     
+
+      unsubscribe = onSnapshot(
+        query(
+          collection(db, "users"),
+          where("id", "not-in", [...passedUserIds, ...swipedUserIds])
+        ),
+        (snapShot) => {
+          setProfile(
+            snapShot.docs
+              .filter((doc) => doc.id !== user.uid)
+              .map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+              }))
+          );
+        }
+      );
+
+
+     }
     fetchCards();
-    return unnsubscribe;
+    return unsubscribe;
   },[])
+
+
+
+
+
+  const swipeLeft = (cardIndex) => {
+    if (!profile[cardIndex]) {
+      return;
+    }
+
+    const userSwiped = profile[cardIndex];
+    setDoc(doc(db, "users", user.uid, "passes", userSwiped.id), userSwiped);
+  };
+  const swipeRight  = async  (cardIndex  ) => {
+    if (!profile[cardIndex]) {
+      return;
+    }
+
+    const userSwiped = profile[cardIndex];
+
+      const loggedInProfile = await (
+        await getDoc(doc(db, "users", user.uid))
+      ).data();
+      
+      getDoc(doc(db,"users",userSwiped.id,"swipes",user.uid)).then((docSnap)=>{
+        if(docSnap.exists()){
+          setDoc(
+            doc(db,"users",user.uid , "swipes" , userSwiped.id),
+            userSwiped
+          );
+          setDoc(doc(db, "matches", generateId(user.uid, userSwiped.id)), {
+            users: {
+              [user.uid]: loggedInProfile,
+              [userSwiped.id]: userSwiped,
+            },
+            usersMatched: [user.uid, userSwiped.id],
+            timestamp,
+          });
+          
+          navigation.navigate("Match", {
+            loggedInProfile,
+            userSwiped,
+          });
+
+        }
+        else{
+          setDoc(
+            doc(db,"users",user.uid , "swipes" , userSwiped.id),
+            userSwiped
+          );
+        }
+      })
+
+  }
 
   
 
@@ -119,7 +214,14 @@ const HomeScreen = () => {
     cardIndex={0}
     animateCardOpacity
     verticalSwipe={false}
-    
+    onSwipedLeft={(cardIndex) => {
+        console.log("Swipe Pass");
+        swipeLeft(cardIndex);
+      }}
+      onSwipedRight={(cardIndex) => {
+        console.log("Swipe Match");
+        swipeRight(cardIndex);
+      }}
     backgroundColor="#4FD0E9"
     overlayLabels={{
       left: {

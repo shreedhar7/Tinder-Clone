@@ -93,6 +93,7 @@ const LoginScreen = () => {
               )}
               value={email}
               onChangeText={(text) => setEmail(text)}
+              required
             />
             <Text style={tw.style("font-semibold pb-2 text-white")}>
               Password

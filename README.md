@@ -1,6 +1,6 @@
 # Tinder-Clone
 
-https://github.com/user-attachments/assets/68ec04b6-93d8-4d32-a76f-a16cb73ea5be
+https://github.com/user-attachments/assets/4c3b0b5f-d266-477a-a1dd-0ccb7e8eeb09
 
 ![tinder 1](https://github.com/user-attachments/assets/70457dce-f7ad-4b45-b6d1-edc496877f91)
 
